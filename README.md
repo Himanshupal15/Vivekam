@@ -18,3 +18,8 @@ View your app in AI Studio: https://ai.studio/apps/10273abf-7558-4676-b3ff-68b91
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Quote attribution
+
+Teaching records, direct source links, the quote-change log, and audit scope are
+documented in [Quote attribution and source audit](docs/quote-attribution.md).

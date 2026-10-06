@@ -19,7 +19,7 @@ import {
   ChevronRight,
   Flame
 } from 'lucide-react';
-import { TeachingRecord, VERIFIED_TEACHINGS } from '../data/teachings';
+import { TEACHING_ID_ALIASES, TeachingRecord, VERIFIED_TEACHINGS } from '../data/teachings';
 
 interface ReelStudioProps {
   reel: GeneratedReel;
@@ -185,7 +185,8 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
   };
 
   // Find teaching record for direct external links
-  const teachingRecord = teachings.find(t => t.id === reel.teachingId) || VERIFIED_TEACHINGS[0];
+  const teachingId = TEACHING_ID_ALIASES[reel.teachingId] || reel.teachingId;
+  const teachingRecord = teachings.find(t => t.id === teachingId) || VERIFIED_TEACHINGS[0];
   const sourceQuote = reel.sourcePassport.sourceQuote || teachingRecord.teaching;
   const sourceUrl = reel.sourcePassport.sourceUrl || teachingRecord.sourceUrl;
   const sourceStatus = reel.sourcePassport.sourceStatus || (teachingRecord.sourceStatus === 'verified' ? 'Verified ✓' : 'Unverified');
@@ -437,9 +438,9 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8b5a2b]">
                   ROOT / SOURCE
                 </span>
-                <span className="flex items-center gap-1 rounded bg-[#27190f] px-2 py-0.5 text-[10px] font-bold text-[#f7eedf]">
-                  <ShieldCheck className="h-3 w-3 text-[#c38c3e]" />
-                  VERIFIED
+                <span className={`flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold text-[#f7eedf] ${sourceStatus === 'Verified ✓' ? 'bg-[#27190f]' : 'bg-amber-800'}`}>
+                  {sourceStatus === 'Verified ✓' ? <ShieldCheck className="h-3 w-3 text-[#c38c3e]" /> : <Info className="h-3 w-3" />}
+                  {sourceStatus}
                 </span>
               </div>
 
@@ -643,13 +644,13 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                     <div className="space-y-1.5 pointer-events-auto max-h-[85%] overflow-y-auto scrollbar-thin">
                       <div className="flex items-center gap-1.5">
                         <span className="rounded-md bg-emerald-700 px-2.5 py-0.5 text-[9px] font-extrabold text-white tracking-widest uppercase shadow-xs">
-                          VERIFIED ORIGINAL TEACHING
+                          {reel.language === 'hi' ? 'HINDI TRANSLATION' : 'SOURCE QUOTATION'}
                         </span>
                       </div>
                       <div className="rounded-xl bg-gradient-to-b from-[#22160d]/95 to-[#120a05]/95 p-3.5 sm:p-4 backdrop-blur-md border-2 border-[#c38c3e]/80 shadow-2xl">
                         <span className="font-serif-vintage text-2xl text-[#c38c3e] leading-none block -mb-2">“</span>
                         <p className="font-serif-vintage text-xs sm:text-sm font-bold text-amber-100 italic leading-relaxed">
-                          {teachingRecord.teaching}
+                          {reel.language === 'hi' ? teachingRecord.languageVersions.hi : sourceQuote}
                         </p>
                         <div className="mt-2.5 pt-2 border-t border-[#c38c3e]/30 flex flex-col gap-0.5">
                           <span className="font-serif-vintage text-xs font-bold text-[#c38c3e]">
@@ -660,20 +661,21 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                           </span>
                         </div>
                         
-                        {/* Direct Tap to View Archival Record */}
-                        <button
-                          onClick={() => setShowSourceModal(true)}
+                        <a
+                          href={sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="mt-2.5 flex items-center justify-between w-full rounded-lg bg-[#c38c3e]/20 hover:bg-[#c38c3e]/30 border border-[#c38c3e]/40 px-2.5 py-1 text-[10px] font-semibold text-amber-200 transition-colors"
                         >
                           <span className="flex items-center gap-1">
                             <ShieldCheck className="h-3 w-3 text-emerald-400" />
-                            <span>Complete Works Archival Record</span>
+                            <span>Open original source</span>
                           </span>
                           <span className="flex items-center gap-0.5 text-[#f7eedf]">
-                            <span>View Source</span>
+                            <span>Open link</span>
                             <ExternalLink className="h-2.5 w-2.5" />
                           </span>
-                        </button>
+                        </a>
                       </div>
                     </div>
                   )}
@@ -991,7 +993,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 </span>
                 <div className={`flex items-center gap-1 text-xs font-bold ${sourceStatus === 'Verified ✓' ? 'text-emerald-800' : 'text-amber-800'}`}>
                   {sourceStatus === 'Verified ✓' ? <CheckCircle2 className="h-4 w-4" /> : <Info className="h-4 w-4" />}
-                  <span>{reel.sourcePassport.sourceStatus}</span>
+                  <span>{sourceStatus}</span>
                 </div>
               </div>
 
@@ -1225,7 +1227,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 </div>
               </div>
 
-              {/* Verbatim Quotation in Calligraphic Style */}
+              {/* Source quotation; the displayed Hindi version is a translation. */}
               <div className="mt-5 rounded-xl border border-[#c8b598] bg-[#f5ebd9] p-5 shadow-xs">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#8b5a2b]">
                   {reel.language === 'hi' ? 'Original Source Wording (English):' : 'Quotation as Recorded in the Source:'}

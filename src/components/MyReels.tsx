@@ -86,9 +86,9 @@ export const MyReels: React.FC<MyReelsProps> = ({
                       <span className="rounded bg-black/60 px-2 py-0.5 text-[10px] font-bold text-amber-200 backdrop-blur-xs">
                         {reel.theme}
                       </span>
-                      <span className="flex items-center gap-1 rounded bg-[#27190f] px-2 py-0.5 text-[10px] font-semibold text-white">
-                        <ShieldCheck className="h-3 w-3 text-[#c38c3e]" />
-                        VERIFIED
+                      <span className={`flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold text-white ${reel.sourcePassport.sourceStatus === 'Verified ✓' ? 'bg-[#27190f]' : 'bg-amber-800'}`}>
+                        {reel.sourcePassport.sourceStatus === 'Verified ✓' && <ShieldCheck className="h-3 w-3 text-[#c38c3e]" />}
+                        {reel.sourcePassport.sourceStatus}
                       </span>
                     </div>
 
@@ -97,7 +97,7 @@ export const MyReels: React.FC<MyReelsProps> = ({
                         {reel.title}
                       </p>
                       <p className="text-[10px] text-amber-200 mt-0.5">
-                        {reel.languageLabel} • 7 Scenes • 58s
+                        {reel.languageLabel} • {reel.scenes.length} Scenes • {reel.totalDurationSeconds}s
                       </p>
                     </div>
 

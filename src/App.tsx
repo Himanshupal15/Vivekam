@@ -9,9 +9,43 @@ import { ReelStudio } from './components/ReelStudio';
 import { MyReels } from './components/MyReels';
 import { TeachingLibrary } from './components/TeachingLibrary';
 import { AboutView } from './components/AboutView';
-import { VERIFIED_TEACHINGS, TeachingRecord } from './data/teachings';
+import { TEACHING_ID_ALIASES, VERIFIED_TEACHINGS, TeachingRecord } from './data/teachings';
 import { GeneratedReel } from './types';
 import { buildDeterministicReel } from './utils/reelGenerator';
+
+function refreshSavedReel(reel: GeneratedReel, records: TeachingRecord[]): GeneratedReel {
+  const teachingId = TEACHING_ID_ALIASES[reel.teachingId] || reel.teachingId;
+  const teaching = records.find((record) => record.id === teachingId);
+  if (!teaching) return reel;
+  if (
+    reel.teachingId === teaching.id &&
+    reel.sourcePassport?.sourceQuote === teaching.teaching &&
+    reel.sourcePassport?.sourceUrl === teaching.sourceUrl
+  ) {
+    return reel;
+  }
+
+  const refreshed = buildDeterministicReel(
+    teaching,
+    reel.storyContext,
+    reel.language,
+    reel.userProblem,
+    reel.totalDurationSeconds
+  );
+
+  return {
+    ...refreshed,
+    id: reel.id,
+    createdAt: reel.createdAt,
+    actionChallenge: {
+      ...refreshed.actionChallenge,
+      id: reel.actionChallenge?.id || refreshed.actionChallenge.id,
+      accepted: reel.actionChallenge?.accepted ?? false,
+      completed: reel.actionChallenge?.completed ?? false,
+      reflection: reel.actionChallenge?.reflection,
+    },
+  };
+}
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'home' | 'create' | 'studio' | 'reels' | 'library' | 'about'>('home');
@@ -36,7 +70,12 @@ export default function App() {
   const [reels, setReels] = useState<GeneratedReel[]>(() => {
     try {
       const saved = localStorage.getItem('vivekreel_saved_reels');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const custom = JSON.parse(localStorage.getItem('vivekreel_custom_teachings') || '[]');
+        const records = [...VERIFIED_TEACHINGS, ...(Array.isArray(custom) ? custom : [])];
+        return Array.isArray(parsed) ? parsed.map((reel) => refreshSavedReel(reel, records)) : [];
+      }
     } catch (e) {
       console.warn("Storage read error:", e);
     }
@@ -109,7 +148,8 @@ export default function App() {
 
   // Switch language inside studio
   const handleSwitchLanguageInStudio = (newLang: 'en' | 'hi') => {
-    const teaching = teachings.find(t => t.id === currentReel.teachingId) || VERIFIED_TEACHINGS[0];
+    const teachingId = TEACHING_ID_ALIASES[currentReel.teachingId] || currentReel.teachingId;
+    const teaching = teachings.find(t => t.id === teachingId) || VERIFIED_TEACHINGS[0];
     const adapted = buildDeterministicReel(
       teaching,
       currentReel.storyContext,

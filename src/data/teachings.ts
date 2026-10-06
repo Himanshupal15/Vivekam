@@ -1139,6 +1139,11 @@ export const VERIFIED_TEACHINGS: TeachingRecord[] = [
   },
 ];
 
+export const TEACHING_ID_ALIASES: Record<string, string> = {
+  q16: "q01",
+  q21: "q14",
+};
+
 
 // ========================================================
 // FEELING TILES
