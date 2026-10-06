@@ -453,7 +453,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-[#785942]">Source Canon</span>
+                  <span className="text-[11px] text-[#785942]">Source work</span>
                   <p className="font-semibold text-[#2b1b11]">
                     {reel.sourcePassport.sourceName}
                   </p>
@@ -485,71 +485,6 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                   </span>
                   <p className="mt-1 font-serif-vintage text-xs italic text-[#2b1b11] leading-relaxed">
                   "{reel.language === 'hi' ? teachingRecord.languageVersions.hi : sourceQuote}"
-                  </p>
-                </div>
-
-                <a
-                  href={sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#8b5a2b] bg-[#eddcc4] py-2 text-center text-xs font-bold text-[#2b1b11] transition-colors hover:bg-[#27190f] hover:text-[#f7eedf]"
-                >
-                  <span>OPEN ORIGINAL SOURCE</span>
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              </div>
-            </div>
-
-            {/* Reality Boundary Visual Map */}
-            <div className="rounded-xl border border-[#bfa588]/40 bg-[#f7eedf] p-5 shadow-xs">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b11]">
-                <Layers className="h-3.5 w-3.5 text-[#8b5a2b]" />
-                <span>WHAT IS REAL?</span>
-              </div>
-              <p className="mt-1 text-[11px] text-[#684c36]">
-                Strict architectural boundary between historical source and AI-generated interpretation:
-              </p>
-              <div className="mt-3 space-y-1.5 text-[11px]">
-                <div className="flex items-center gap-2 rounded bg-[#e8dbcc] px-2.5 py-1.5 font-bold text-[#27190f]">
-                  <span className="h-2 w-2 rounded-full bg-emerald-600" />
-                  <span>HISTORICAL SOURCE</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Content intentionally continues below. */}
-            <div className="hidden">
-              <span className="font-semibold text-[#2b1b11]">
-                  {reel.sourcePassport.sourceName}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <span className="text-[11px] text-[#785942]">Volume</span>
-                    <p className="font-semibold text-[#2b1b11]">{reel.sourcePassport.volume}</p>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-[#785942]">Source status</span>
-                    <p className={`font-semibold ${sourceStatus === 'Verified ✓' ? 'text-emerald-800' : 'text-amber-800'}`}>
-                      {sourceStatus}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[11px] text-[#785942]">Section / Chapter</span>
-                  <p className="font-medium text-[#4a3322] leading-snug">
-                    {reel.sourcePassport.section}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-[#c8b598]/60 bg-[#eddcc4]/60 p-2.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8b5a2b]">
-                    {reel.language === 'hi' ? 'Hindi Translation:' : 'Source Wording:'}
-                  </span>
-                  <p className="mt-1 font-serif-vintage text-xs italic text-[#2b1b11] leading-relaxed">
-                    "{reel.language === 'hi' ? teachingRecord.languageVersions.hi : sourceQuote}"
                   </p>
                 </div>
 
@@ -972,7 +907,9 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
               <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-lg border border-emerald-800/20 bg-emerald-50/60 p-2 text-emerald-900">
                   <span className="font-bold">✓ SOURCE</span>
-                  <p className="text-[11px]">1 verified quotation</p>
+                  <p className="text-[11px]">
+                    {sourceStatus === 'Verified ✓' ? '1 source-verified quotation' : '1 unverified quotation'}
+                  </p>
                 </div>
                 <div className="rounded-lg border border-amber-800/20 bg-amber-50/60 p-2 text-amber-900">
                   <span className="font-bold">● INTERPRETATION</span>
@@ -1305,7 +1242,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 </p>
               </div>
 
-              {/* Canonical Citation Specs */}
+              {/* Citation details */}
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="rounded-lg border border-[#dfccaF] bg-[#eddcc4]/50 p-3">
                   <span className="text-[10px] font-bold text-[#785942] uppercase tracking-wider">Source Publication</span>
@@ -1321,7 +1258,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
 
               {/* Historical Context / Delivery */}
               <div className="mt-4 rounded-lg border border-[#dfccaF] bg-[#eddcc4]/40 p-3.5 text-xs">
-                <span className="text-[10px] font-bold text-[#785942] uppercase tracking-wider">Historical Setting & Discourse Context</span>
+                <span className="text-[10px] font-bold text-[#785942] uppercase tracking-wider">Source context</span>
                 <p className="mt-1 text-xs text-[#3b2718] leading-relaxed">
                   {teachingRecord.context}
                 </p>
