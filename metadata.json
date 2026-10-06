@@ -1,0 +1,6 @@
+{
+  "name": "VivekReel",
+  "description": "Teaching-to-Reel Generator — Turning verified teachings of Swami Vivekananda into honest, engaging 30–60 second reels with real-world 24-hour action.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

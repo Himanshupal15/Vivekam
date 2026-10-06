@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --parchment-bg: #eddcc4;
+    --parchment-light: #f7eedf;
+    --parchment-dark: #ddc6a7;
+    --parchment-card: #f9f3e7;
+    --deckle-border: #8b5a2b;
+    --text-primary: #2c1b10;
+    --text-muted: #5e4331;
+    --accent-saffron: #cf6b1c;
+    --accent-gold: #c38c3e;
+    --card-shadow: 0 10px 25px -5px rgba(44, 27, 16, 0.15), 0 8px 10px -6px rgba(44, 27, 16, 0.1);
+  }
+
+  body {
+    background-color: #1a120c;
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(207, 107, 28, 0.12), transparent 45%),
+      radial-gradient(circle at 10% 80%, rgba(139, 90, 43, 0.15), transparent 40%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, .font-serif-vintage {
+    font-family: 'Cinzel', 'Cormorant Garamond', serif;
+  }
+
+  .font-quote {
+    font-family: 'Kalam', cursive;
+  }
+}
+
+/* Antique deckle torn paper edge effect */
+.parchment-banner {
+  background-color: #eddcc4;
+  background-image: 
+    radial-gradient(ellipse at 80% 20%, rgba(255, 250, 240, 0.6) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(197, 163, 124, 0.35) 0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.5   0 0 0 0 0.4   0 0 0 0 0.3  0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperNoise)'/%3E%3C/svg%3E");
+  box-shadow: 
+    inset 0 0 60px rgba(100, 60, 25, 0.15),
+    0 12px 30px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+.torn-paper-top {
+  position: relative;
+}
+.torn-paper-top::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background-repeat: repeat-x;
+  background-size: 40px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 14'%3E%3Cpath d='M0,14 L0,4 Q5,1 10,6 T20,2 T30,7 T40,3 L40,14 Z' fill='%23eddcc4'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 -3px 3px rgba(35, 20, 10, 0.3));
+}
+
+.torn-paper-bottom {
+  position: relative;
+}
+.torn-paper-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background-repeat: repeat-x;
+  background-size: 40px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 14'%3E%3Cpath d='M0,0 L0,10 Q5,13 10,8 T20,12 T30,7 T40,11 L40,0 Z' fill='%23eddcc4'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 3px 3px rgba(35, 20, 10, 0.3));
+}
+
+/* Dark wooden ribbon */
+.wood-strip {
+  background: linear-gradient(180deg, #1f140c 0%, #170d07 100%);
+  border-top: 1px solid rgba(139, 90, 43, 0.25);
+  border-bottom: 1px solid rgba(139, 90, 43, 0.25);
+}
+
+/* Vintage polaroid frame */
+.polaroid-frame {
+  background: #f7eedf;
+  box-shadow: 
+    0 15px 35px -5px rgba(15, 10, 5, 0.45),
+    0 0 0 1px rgba(100, 60, 20, 0.15);
+  transform: rotate(2deg);
+  transition: transform 0.3s ease;
+}
+.polaroid-frame:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1f140c;
+}
+::-webkit-scrollbar-thumb {
+  background: #8b5a2b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c38c3e;
+}
+
