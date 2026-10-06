@@ -757,7 +757,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                           <span className="font-serif-vintage font-bold text-xs text-amber-100">
                             {reel.sourcePassport.sourceName}
                           </span>
-                          <span className="text-[9px] font-bold text-emerald-400">{sourceStatus}</span>
+                          <span className={`text-[9px] font-bold ${sourceStatus === 'Verified ✓' ? 'text-emerald-400' : 'text-amber-300'}`}>{sourceStatus}</span>
                         </div>
                         <p className="mt-1.5 text-[11px] text-white">
                           {reel.sourcePassport.volume} • {reel.sourcePassport.section}
@@ -989,33 +989,19 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8b5a2b]">
                   REEL PASSPORT
                 </span>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-800">
-                  <CheckCircle2 className="h-4 w-4" />
+                <div className={`flex items-center gap-1 text-xs font-bold ${sourceStatus === 'Verified ✓' ? 'text-emerald-800' : 'text-amber-800'}`}>
+                  {sourceStatus === 'Verified ✓' ? <CheckCircle2 className="h-4 w-4" /> : <Info className="h-4 w-4" />}
                   <span>{reel.sourcePassport.sourceStatus}</span>
                 </div>
               </div>
 
-              {/* Content Integrity Score Meter */}
-              <div className="mt-4 rounded-lg bg-[#27190f] p-3 text-[#f7eedf]">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#c38c3e]">
-                    Content Integrity
-                  </span>
-                  <span className="font-serif-vintage text-xl font-bold text-amber-200">
-                    {reel.sourcePassport.contentIntegrityScore} / 100
-                  </span>
-                </div>
-                <p className="mt-1 text-[10px] text-[#d6bda2]">
-                  Reflects the verified source grounding & absence of hallucinated quotes.
+              <div className="mt-4 rounded-lg border border-[#c8b598] bg-[#ebdcc6]/70 p-3 text-xs text-[#3b2718]">
+                <p>
+                  The original source page is linked below. Stories and practical interpretations in this reel are generated separately from the quotation.
                 </p>
-              </div>
-
-              {/* Claims Check Breakdown */}
-              <div className="mt-3 flex items-center justify-between rounded-md bg-[#ebdcc6]/70 px-3 py-2 text-xs font-medium text-[#3b2718]">
-                <span>Claims Checked:</span>
-                <span className="font-bold text-emerald-800">
-                  {reel.sourcePassport.claimsChecked} checked • {reel.sourcePassport.claimsSupported} supported • {reel.sourcePassport.claimsUnsupported} unsupported
-                </span>
+                <a className="mt-2 inline-flex items-center gap-1 font-semibold text-[#8b5a2b] underline underline-offset-2" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+                  Open original source <ExternalLink className="h-3 w-3" />
+                </a>
               </div>
 
               {/* Passport specs table */}
@@ -1227,14 +1213,14 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-serif-vintage text-xl font-bold text-[#2b1b11]">
-                      Canonical Archival Source Record
+                      Quotation & Source Details
                     </span>
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                      100% CANONICAL
+                    <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${sourceStatus === 'Verified ✓' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {sourceStatus}
                     </span>
                   </div>
                   <p className="text-xs text-[#785942]">
-                    The Complete Works of Swami Vivekananda • Truth Ledger Verified
+                    Source publication, location, and direct link
                   </p>
                 </div>
               </div>
@@ -1242,10 +1228,10 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
               {/* Verbatim Quotation in Calligraphic Style */}
               <div className="mt-5 rounded-xl border border-[#c8b598] bg-[#f5ebd9] p-5 shadow-xs">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#8b5a2b]">
-                  Verbatim Canonical Quotation:
+                  {reel.language === 'hi' ? 'Original Source Wording (English):' : 'Quotation as Recorded in the Source:'}
                 </span>
                 <p className="mt-2 font-serif-vintage text-base sm:text-lg font-bold text-[#2b1b11] italic leading-relaxed">
-                  "{teachingRecord.teaching}"
+                  "{sourceQuote}"
                 </p>
                 <p className="mt-2 font-serif-vintage text-xs text-[#8b5a2b] text-right font-semibold">
                   — Swami Vivekananda
@@ -1257,7 +1243,7 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 <div className="rounded-lg border border-[#dfccaF] bg-[#eddcc4]/50 p-3">
                   <span className="text-[10px] font-bold text-[#785942] uppercase tracking-wider">Source Publication</span>
                   <p className="mt-0.5 font-bold text-[#2b1b11]">{teachingRecord.sourceName}</p>
-                  <p className="text-[11px] text-[#6e513a]">Published by Advaita Ashrama / Belur Math</p>
+                  <p className="text-[11px] text-[#6e513a]">Use the linked source page to confirm its publisher and wording.</p>
                 </div>
                 <div className="rounded-lg border border-[#dfccaF] bg-[#eddcc4]/50 p-3">
                   <span className="text-[10px] font-bold text-[#785942] uppercase tracking-wider">Volume & Chapter</span>
@@ -1272,16 +1258,18 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 <p className="mt-1 text-xs text-[#3b2718] leading-relaxed">
                   {teachingRecord.context}
                 </p>
-                <p className="mt-2 text-[11px] text-[#6e513a] italic leading-normal">
-                  Recorded directly from Swamiji's authentic discourses, letters, and lectures preserved in the authoritative Complete Works.
-                </p>
+                {reel.language === 'hi' && (
+                  <p className="mt-2 text-[11px] text-[#6e513a] italic leading-normal">
+                    The Hindi narration is a translation of the English quotation shown above; the linked page remains the reference for the original wording.
+                  </p>
+                )}
               </div>
 
               {/* Trust & Integrity Badges */}
               <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
                 <span className="flex items-center gap-1 rounded-full border border-emerald-600/30 bg-emerald-50 px-3 py-1 font-semibold text-emerald-800">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>Integrity: 98/100</span>
+                  <span>Source reference attached</span>
                 </span>
                 <span className="flex items-center gap-1 rounded-full border border-[#8b5a2b]/30 bg-[#ebdcc6] px-3 py-1 font-semibold text-[#2b1b11]">
                   <Lock className="h-3.5 w-3.5 text-[#8b5a2b]" />
@@ -1292,56 +1280,27 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
                 </span>
               </div>
 
-              {/* Verified Online Mirrors (Safe Direct Links) */}
+              {/* The sourceUrl on the teaching record is the citation target. */}
               <div className="mt-5 border-t border-[#dfccaF] pt-4">
                 <span className="text-xs font-bold text-[#2b1b11] block mb-2">
-                  Verified Canonical Digital Mirrors (External Archive Access):
+                  Original source page:
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <a
-                    href={teachingRecord.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-lg border border-[#8b5a2b]/50 bg-[#eddcc4] px-3 py-2 text-[#2b1b11] font-semibold hover:bg-[#27190f] hover:text-[#f7eedf] transition-colors"
-                  >
-                    <span>Wikisource Open Canon</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                  <a
-                    href="https://www.ramakrishnavivekananda.info/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-lg border border-[#8b5a2b]/50 bg-[#eddcc4] px-3 py-2 text-[#2b1b11] font-semibold hover:bg-[#27190f] hover:text-[#f7eedf] transition-colors"
-                  >
-                    <span>Ramakrishna-Vivekananda Library</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                  <a
-                    href="https://advaitaashrama.org/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-lg border border-[#8b5a2b]/50 bg-[#eddcc4] px-3 py-2 text-[#2b1b11] font-semibold hover:bg-[#27190f] hover:text-[#f7eedf] transition-colors"
-                  >
-                    <span>Advaita Ashrama Publication</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                  <a
-                    href="https://belurmath.org/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-lg border border-[#8b5a2b]/50 bg-[#eddcc4] px-3 py-2 text-[#2b1b11] font-semibold hover:bg-[#27190f] hover:text-[#f7eedf] transition-colors"
-                  >
-                    <span>Belur Math Official Portal</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                </div>
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg border border-[#8b5a2b]/50 bg-[#eddcc4] px-3 py-2 text-xs text-[#2b1b11] font-semibold hover:bg-[#27190f] hover:text-[#f7eedf] transition-colors break-all"
+                >
+                  <span>{sourceUrl}</span>
+                  <ExternalLink className="ml-2 h-3.5 w-3.5 shrink-0" />
+                </a>
               </div>
 
               {/* Modal Footer / Action Buttons */}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#dfccaF] pt-4">
                 <button
                   onClick={() => {
-                    const cite = `Vivekananda, Swami. "${teachingRecord.teaching}" ${teachingRecord.sourceName}, ${teachingRecord.volume}, ${teachingRecord.chapter}. Belur Math / Advaita Ashrama.`;
+                    const cite = `Vivekananda, Swami. "${sourceQuote}" ${teachingRecord.sourceName}, ${teachingRecord.volume}, ${teachingRecord.chapter}. ${sourceUrl}`;
                     navigator.clipboard?.writeText(cite);
                     setCopiedCitation(true);
                     setTimeout(() => setCopiedCitation(false), 2500);

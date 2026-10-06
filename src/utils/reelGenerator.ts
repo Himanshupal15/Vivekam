@@ -138,7 +138,7 @@ export function buildDeterministicReel(
       },
       3: {
         title: sceneTitles.teaching,
-        narration: isHindi ? `"${teachingQuote}." — स्वामी विवेकानंद` : `"${teachingQuote}." — Swami Vivekananda.`,
+        narration: isHindi ? `"${teachingQuote}" — स्वामी विवेकानंद` : `"${teachingQuote}" — Swami Vivekananda.`,
         subtitle: `"${teachingQuote}"`,
         category: 'SOURCE',
         caption: visualCaptions.teaching,

@@ -121,7 +121,7 @@ export const TeachingLibrary: React.FC<TeachingLibraryProps> = ({
               </h1>
             </div>
             <p className="mt-1 text-sm text-[#684c36]">
-              Verified canon from the Complete Works of Swami Vivekananda and official Belur Math records.
+              Source-linked quotations from the Complete Works and Vivekananda archives.
             </p>
           </div>
 
@@ -130,7 +130,7 @@ export const TeachingLibrary: React.FC<TeachingLibraryProps> = ({
             className="inline-flex items-center gap-2 rounded-full bg-[#27190f] px-5 py-2.5 text-xs sm:text-sm font-bold text-[#f7eedf] shadow-md hover:bg-[#3d2718] self-start sm:self-auto"
           >
             <Plus className="h-4 w-4 text-[#c38c3e]" />
-            <span>Add Verified Teaching</span>
+            <span>Add Teaching</span>
           </button>
         </div>
 
@@ -177,8 +177,8 @@ export const TeachingLibrary: React.FC<TeachingLibraryProps> = ({
                   <span className="rounded-full bg-[#8b5a2b]/15 px-2.5 py-0.5 text-xs font-bold text-[#8b5a2b]">
                     {t.theme}
                   </span>
-                  <span className="flex items-center gap-1 rounded bg-[#27190f] px-2 py-0.5 text-[10px] font-semibold text-[#f7eedf]">
-                    <ShieldCheck className="h-3 w-3 text-[#c38c3e]" />
+                  <span className={`flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold text-[#f7eedf] ${t.sourceStatus === 'verified' ? 'bg-[#27190f]' : 'bg-amber-800'}`}>
+                    {t.sourceStatus === 'verified' ? <ShieldCheck className="h-3 w-3 text-[#c38c3e]" /> : <AlertTriangle className="h-3 w-3" />}
                     {t.sourceStatus === 'verified' ? 'SOURCE VERIFIED' : 'UNVERIFIED'}
                   </span>
                 </div>
@@ -261,7 +261,7 @@ export const TeachingLibrary: React.FC<TeachingLibraryProps> = ({
                       required
                       value={newQuote}
                       onChange={(e) => setNewQuote(e.target.value)}
-                      placeholder="Enter verified historical quote..."
+                      placeholder="Enter a historical quotation..."
                       rows={3}
                       className="w-full rounded-lg border border-[#c8b598] bg-[#fbf6ed] p-2.5 text-xs text-[#2b1b11] focus:border-[#8b5a2b] focus:outline-hidden"
                     />
