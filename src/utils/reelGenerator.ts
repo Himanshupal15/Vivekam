@@ -71,7 +71,7 @@ export function buildDeterministicReel(
         interpretation: 'प्राचीन सिद्धांत को आज की जटिलताओं से जोड़ना',
         takeaway: 'दैनिक.Reflection के लिए मुख्य सीख',
         action: 'कार्रवाई योग्य micro-practice',
-        source: 'आधिकारिक Belur Math archive verification'
+        source: `स्रोत: ${teaching.sourceName}, ${teaching.volume}, ${teaching.chapter}`
       }
     : {
         hook: 'Modern youth situation: Moment of hesitation',
@@ -80,7 +80,7 @@ export function buildDeterministicReel(
         interpretation: 'Translating ancient principle into psychological clarity',
         takeaway: 'Core takeaway for daily reflection',
         action: 'Actionable micro-practice',
-        source: 'Official Belur Math digital archives verification'
+        source: `Source: ${teaching.sourceName}, ${teaching.volume}, ${teaching.chapter}`
       };
 
   const baseSceneDurations = [3, 9, 10, 11, 7, 9, 8];
@@ -210,8 +210,8 @@ export function buildDeterministicReel(
           contentType: 'SOURCE CITATION',
           sourceName: teaching.sourceName,
           status: 'VERIFIED',
-          changeFromSource: 'Official citation',
-          purpose: 'Unambiguous attribution to authentic historical record'
+          changeFromSource: 'Citation to linked source page',
+          purpose: 'Points viewers to the specific source record'
         }
       }
     };
