@@ -49,6 +49,7 @@ export interface ReelScene {
 export interface GeneratedReel {
   id: string;
   createdAt: string;
+  generationMode?: 'gemini' | 'deterministic' | 'local-fallback';
   teachingId: string;
   theme: string;
   storyContext: StoryContext;

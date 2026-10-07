@@ -225,7 +225,11 @@ Ramakrishna Math, Belur Math, and Advaita Ashrama.
 ### Personal dilemma matching
 
 `analyzeUserDilemma()` is a deterministic keyword/concept matcher; it does not
-call Gemini or use an embedding/vector search. It:
+call Gemini or use an embedding/vector search. The shared
+`isTeachingRelatedPrompt()` gate checks prompt concepts and meaningful terms
+against the stored themes, tags, titles, and feeling prompts. Catalogue-related
+paraphrases are accepted; unrelated prompts return no teaching suggestions and
+are blocked before reel generation. It:
 
 1. Lowercases and trims the input.
 2. Detects concepts using substring checks for terms associated with failure,
@@ -233,28 +237,23 @@ call Gemini or use an embedding/vector search. It:
 3. Adds confidence for failure/self-doubt cases, or uses fallback concepts if
    no keyword is detected.
 4. Applies a special ranked list for common failure/self-doubt wording.
-5. Otherwise scores catalogue records by simple text overlap and returns up to
-   three matches.
+5. Otherwise scores relevant catalogue records by mapped themes and stored
+   feeling matches and returns up to three matches.
 
 Displayed match scores are heuristic UI values, not probabilities or calibrated
 confidence scores.
 
 ### Custom quote check in the create flow
 
-The create-flow quote tester searches the built-in verified catalogue locally.
-A record can match when the normalized input:
+The create-flow quote tester searches only the wording of built-in teaching
+quotes. It accepts an exact quote or a substantial contiguous excerpt (at least
+four words and 20 characters). Titles, themes, and tags cannot establish a
+quote match. The result is labelled **QUOTE MATCH FOUND**, not source verified:
+the check does not fetch or inspect the linked website.
 
-- occurs within a teaching quotation;
-- contains the opening 20 characters of a stored teaching; or
-- contains one of the record's tags.
-
-This is a lightweight lookup, not an exact quotation proof. A tag match may
-identify a teaching even if the entered wording is not a quote. The interface
-does not fetch or inspect the linked website during this check.
-
-The backend also exposes `/api/verify-quote` with related substring, tag, and
-title matching. The current create-flow handler performs its own local check;
-it does not call that API endpoint.
+The backend `/api/verify-quote` endpoint uses the same quote-only matcher and
+returns `QUOTE_MATCH_FOUND` or `SOURCE_NOT_FOUND`, including a note that the
+source page was not independently checked.
 
 ## Reel generation and provenance
 
@@ -282,9 +281,16 @@ five-second step.
 
 When the backend has `GEMINI_API_KEY`, `/api/generate-reel` asks Gemini for
 creative hook/story/interpretation/takeaway/action wording based on the
-selected built-in teaching. The deterministic generator still supplies the
-scene structure, visual assets, and provenance. If Gemini is unavailable or
-returns unusable output, the server returns a deterministic reel instead.
+selected built-in teaching. It tries `gemini-2.5-flash` first and
+`gemini-3.8-flash` if the first model request fails or returns invalid JSON.
+Generated text is validated and given enough output-token budget to avoid
+truncating the JSON response. The deterministic
+generator still supplies the scene structure, visual assets, and provenance;
+the selected source quote remains unchanged. The API uses the requested
+30–60-second duration. If no key is configured, the server returns a
+deterministic template reel. If a key is configured but both Gemini models fail
+or return invalid data, the server returns an error rather than disguising the
+result as Gemini-generated content.
 
 The key should remain server-side. AI output is requested to follow
 source-grounding instructions, but the prompt is not equivalent to an
@@ -391,6 +397,8 @@ Request fields used by the route:
 - `storyContext` defaults to `campus`.
 - `language` defaults to `en`.
 - Unknown `teachingId` values fall back to the first built-in teaching.
+- A prompt that does not match the teaching context returns HTTP 400 with
+  `This prompt is not related to the teaching context.`
 - Success returns `status: "success"`, a mode (`"gemini-augmented"` or
   `"deterministic-verified"`), and the generated `reel`.
 - An unhandled server error returns HTTP 500 with an error message.
@@ -405,17 +413,17 @@ custom-teaching collection.
 
 - **Storyboard, not video rendering:** no finished MP4 or video export is
   implemented.
-- **Heuristic matching:** dilemma matching and quote checking use deterministic
-  substring/tag logic, not AI semantic search or exact-source validation.
+- **Heuristic matching:** dilemma matching uses deterministic concept rules.
+  Quote checking requires an exact quote or substantial contiguous quote
+  excerpt, but does not verify the text against the live source website.
 - **Gemini is optional:** reel generation works without an API key through
-  local templates. With a key, Gemini augments selected text fields only.
+  local templates. With a key, Gemini generates selected text fields while the
+  catalogue quote, scene structure, and provenance remain source-grounded.
 - **Language coverage:** the UI offers six languages, but deterministic
   generation has explicit Hindi handling and otherwise uses English text.
   Studio switching is limited to English and Hindi. Some catalogue records
   include Hindi wording; the other language choices are not complete
   translations in the current generator.
-- **Duration through API:** the backend currently ignores the requested
-  duration and uses 45 seconds; the local fallback honors the selected value.
 - **Custom teaching over API:** the server only resolves built-in teaching IDs.
   Custom records are handled in browser-side flows, not by server lookup.
 - **No accounts or cloud sync:** reels, custom teachings, and streaks remain

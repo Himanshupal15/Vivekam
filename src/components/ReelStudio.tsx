@@ -315,12 +315,21 @@ export const ReelStudio: React.FC<ReelStudioProps> = ({
               <span className="rounded bg-[#8b5a2b]/20 px-2.5 py-0.5 text-xs font-bold text-[#8b5a2b]">
                 {reel.theme}
               </span>
+              {reel.generationMode && (
+                <span className="rounded bg-[#27190f] px-2.5 py-0.5 text-xs font-semibold text-[#f7eedf]">
+                  {reel.generationMode === 'gemini'
+                    ? 'Gemini-generated'
+                    : reel.generationMode === 'deterministic'
+                      ? 'Template-generated'
+                      : 'Local fallback'}
+                </span>
+              )}
               <h1 className="font-serif-vintage text-2xl font-bold text-[#2b1b11]">
                 {reel.title}
               </h1>
             </div>
             <p className="mt-0.5 text-xs text-[#6e513a]">
-              45–60s Reel Studio • Deterministic 7-Scene Narrative Architecture
+              {reel.totalDurationSeconds}s storyboard • 7 scenes
             </p>
           </div>
 

@@ -18,7 +18,8 @@ import {
   Check
 } from 'lucide-react';
 import { buildDeterministicReel } from '../utils/reelGenerator';
-import { analyzeUserDilemma } from '../utils/semanticMatcher';
+import { analyzeUserDilemma, isTeachingRelatedPrompt } from '../utils/semanticMatcher';
+import { findTeachingQuoteMatch } from '../utils/quoteMatcher';
 
 interface CreateReelFlowProps {
   initialFeeling?: string;
@@ -31,9 +32,19 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
   onReelGenerated,
   onCancel
 }) => {
-  const [currentStep, setCurrentStep] = useState<number>(initialFeeling ? 2 : 1);
+  const initialPromptIsRelated = isTeachingRelatedPrompt(initialFeeling);
+  const [currentStep, setCurrentStep] = useState<number>(
+    initialFeeling && initialPromptIsRelated ? 2 : 1
+  );
   const [selectedFeeling, setSelectedFeeling] = useState<string>(initialFeeling);
-  const [customPromptInput, setCustomPromptInput] = useState<string>('');
+  const [customPromptInput, setCustomPromptInput] = useState<string>(
+    initialFeeling && !initialPromptIsRelated ? initialFeeling : ''
+  );
+  const [promptValidationError, setPromptValidationError] = useState<string>(
+    initialFeeling && !initialPromptIsRelated
+      ? 'This prompt is not related to the teaching context.'
+      : ''
+  );
 
   // Analyze user dilemma semantically
   const semanticAnalysis = useMemo(() => {
@@ -52,6 +63,7 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
   // Loading state with intentional multi-step animation
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationPhase, setGenerationPhase] = useState<string>('');
+  const [generationError, setGenerationError] = useState<string>('');
 
   // Hallucination Firewall Tester State
   const [quoteSearchQuery, setQuoteSearchQuery] = useState<string>('');
@@ -60,7 +72,16 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
 
   // Sync selected teaching when analysis changes
   const handleSelectNewPrompt = (prompt: string) => {
+    if (!isTeachingRelatedPrompt(prompt)) {
+      setCustomPromptInput(prompt);
+      setPromptValidationError('This prompt is not related to the teaching context.');
+      setCurrentStep(1);
+      return;
+    }
+
+    setPromptValidationError('');
     setSelectedFeeling(prompt);
+    setCustomPromptInput(prompt);
     const analysis = analyzeUserDilemma(prompt);
     if (analysis.rankedMatches[0]) {
       setSelectedTeaching(analysis.rankedMatches[0].teaching);
@@ -73,12 +94,7 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
     const q = (customQuery !== undefined ? customQuery : quoteSearchQuery).trim().toLowerCase();
     if (!q) return;
 
-    // Check against authentic database
-    const found = VERIFIED_TEACHINGS.find(
-      t => t.teaching.toLowerCase().includes(q) ||
-           q.includes(t.teaching.toLowerCase().slice(0, 20)) ||
-           t.tags.some(tag => q.includes(tag.toLowerCase()))
-    );
+    const found = findTeachingQuoteMatch(q);
 
     if (found) {
       setQuoteSearchStatus('verified');
@@ -90,57 +106,92 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
     }
   };
 
-  // Generation flow with real/simulated pipeline
+  // Generate a storyboard through the backend when it is reachable.
   const handleStartGeneration = async () => {
-    setIsGenerating(true);
-
-    const phases = [
-      "ROOT: Retrieving verified teaching from Belur Math digital archives...",
-      "REEL: Crafting relatable youth story...",
-      "CLAIM CHECK: Validating source alignment (7 claims checked, 7 supported)...",
-      "LANGUAGE: Preserving semantic intent with Meaning Lock...",
-      "ACT: Synthesizing practical 24-hour Viveka challenge..."
-    ];
-
-    for (let i = 0; i < phases.length; i++) {
-      setGenerationPhase(phases[i]);
-      await new Promise(res => setTimeout(res, 650));
+    if (!isTeachingRelatedPrompt(selectedFeeling)) {
+      setGenerationError('This prompt is not related to the teaching context.');
+      return;
     }
+
+    setIsGenerating(true);
+    setGenerationError('');
+    setGenerationPhase('Generating your source-grounded reel storyboard...');
 
     try {
-      // Try to call full-stack server endpoint
-      const response = await fetch('/api/generate-reel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          teachingId: selectedTeaching.id,
-          storyContext: selectedContext,
-          language: selectedLanguage,
-          userProblem: selectedFeeling,
-          durationSeconds: selectedDuration
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.reel) {
-          onReelGenerated(data.reel);
-          return;
-        }
+      let response: Response;
+      try {
+        response = await fetch('/api/generate-reel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            teachingId: selectedTeaching.id,
+            storyContext: selectedContext,
+            language: selectedLanguage,
+            userProblem: selectedFeeling,
+            durationSeconds: selectedDuration
+          })
+        });
+      } catch (err) {
+        console.warn('Reel API unavailable; using the local deterministic generator:', err);
+        const fallbackReel = buildDeterministicReel(
+          selectedTeaching,
+          selectedContext,
+          selectedLanguage,
+          selectedFeeling,
+          selectedDuration
+        );
+        fallbackReel.generationMode = 'local-fallback';
+        onReelGenerated(fallbackReel);
+        return;
       }
-    } catch (err) {
-      console.warn("Backend API not reachable or in preview fallback, using deterministic engine:", err);
-    }
 
-    // High quality deterministic fallback
-    const fallbackReel = buildDeterministicReel(
-      selectedTeaching,
-      selectedContext,
-      selectedLanguage,
-      selectedFeeling,
-      selectedDuration
-    );
-    onReelGenerated(fallbackReel);
+      let data: { mode?: string; reel?: GeneratedReel; message?: string };
+      try {
+        data = await response.json();
+      } catch {
+        setGenerationError('The reel service returned an unreadable response. Please try again.');
+        return;
+      }
+
+      if (!response.ok) {
+        console.warn('Reel generation API returned an error; falling back to local generator.', data.message);
+        const fallbackReel = buildDeterministicReel(
+          selectedTeaching,
+          selectedContext,
+          selectedLanguage,
+          selectedFeeling,
+          selectedDuration
+        );
+        fallbackReel.generationMode = 'local-fallback';
+        onReelGenerated(fallbackReel);
+        return;
+      }
+
+      const generationMode =
+        data.mode === 'gemini' || data.mode === 'gemini-augmented'
+          ? 'gemini'
+          : data.mode === 'deterministic' || data.mode === 'deterministic-verified' || data.mode === 'deterministic-fallback'
+            ? 'deterministic'
+            : null;
+
+      if (
+        !data.reel ||
+        !Array.isArray(data.reel.scenes) ||
+        data.reel.scenes.length === 0 ||
+        !data.reel.sourcePassport ||
+        !data.reel.actionChallenge ||
+        !generationMode
+      ) {
+        setGenerationError('The reel service returned an incomplete result. Please try again.');
+        return;
+      }
+
+      data.reel.generationMode = generationMode;
+      onReelGenerated(data.reel);
+    } finally {
+      setIsGenerating(false);
+      setGenerationPhase('');
+    }
   };
 
   return (
@@ -194,7 +245,7 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
               <Sparkles className="h-8 w-8" />
             </div>
             <h3 className="mt-6 font-serif-vintage text-2xl font-bold text-[#2b1b11]">
-              Crafting Verified Reel
+              Generating Reel Storyboard
             </h3>
             <p className="mt-2 text-sm font-semibold text-[#8b5a2b]">
               {generationPhase}
@@ -203,8 +254,14 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
               <div className="h-full w-full bg-gradient-to-r from-[#8b5a2b] via-[#cf6b1c] to-[#c38c3e] animate-pulse" />
             </div>
             <p className="mt-4 text-xs text-[#7d5d44]">
-              Ensuring 100% truth provenance and locking practical 24-hour challenge.
+              The selected source quotation remains unchanged; the story and action are tailored to your choices.
             </p>
+          </div>
+        )}
+
+        {!isGenerating && generationError && (
+          <div role="alert" className="mb-6 rounded-xl border border-red-700/30 bg-red-50 p-4 text-sm text-red-900">
+            {generationError}
           </div>
         )}
 
@@ -239,7 +296,10 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
                   <input
                     type="text"
                     value={customPromptInput}
-                    onChange={(e) => setCustomPromptInput(e.target.value)}
+                    onChange={(e) => {
+                      setCustomPromptInput(e.target.value);
+                      setPromptValidationError('');
+                    }}
                     placeholder="e.g., I failed my exam and now I feel like I'm not good enough"
                     className="w-full bg-transparent py-1.5 text-xs sm:text-sm font-medium text-[#2b1b11] placeholder-[#a4866c] outline-hidden"
                   />
@@ -253,6 +313,11 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
                 </button>
               </div>
             </form>
+            {promptValidationError && (
+              <p role="alert" className="mt-3 text-center text-sm font-semibold text-red-800">
+                {promptValidationError}
+              </p>
+            )}
 
             {/* Quick Demo Prompts */}
             <div className="mt-4 flex flex-wrap justify-center items-center gap-2 text-xs">
@@ -523,12 +588,12 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
                   <span className="text-[#785942]">Quick Demo:</span>
                   <button
                     onClick={() => {
-                      setQuoteSearchQuery("Face the brutes");
-                      handleVerifyCustomQuote("Face the brutes");
+                      setQuoteSearchQuery("Strength is life, weakness is death.");
+                      handleVerifyCustomQuote("Strength is life, weakness is death.");
                     }}
                     className="rounded bg-[#ebdcc6] px-2 py-0.5 text-[#2b1b11] hover:bg-[#dfccaF]"
                   >
-                    Try authentic: "Face the brutes"
+                    Try catalogue quote: "Strength is life, weakness is death"
                   </button>
                   <button
                     onClick={() => {
@@ -546,9 +611,9 @@ export const CreateReelFlow: React.FC<CreateReelFlowProps> = ({
                   <div className="mt-3 flex items-start gap-2 rounded-lg bg-[#e2f0d9] p-2.5 text-xs text-[#275c1a]">
                     <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold">SOURCE VERIFIED ✓</span>
+                      <span className="font-bold">QUOTE MATCH FOUND</span>
                       <p className="mt-0.5 text-[11px]">
-                        Matched in {verifiedSearchResult.sourceName}, {verifiedSearchResult.volume}, {verifiedSearchResult.chapter}. Ready to use!
+                          Matching wording found in the catalogue: {verifiedSearchResult.sourceName}, {verifiedSearchResult.volume}, {verifiedSearchResult.chapter}. This check does not independently verify the linked source page.
                       </p>
                     </div>
                   </div>
