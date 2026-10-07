@@ -8,6 +8,15 @@ This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/10273abf-7558-4676-b3ff-68b91448ecca
 
+## Project documentation
+
+See [Vivekam — Project Documentation](docs/project-documentation.md) for the
+application overview, architecture, setup, features, data flow, API, persistence,
+and implementation limitations.
+
+The presentation-ready summary is in
+[Vivekam — PPT Content](docs/vivekam-presentation.md).
+
 ## Run Locally
 
 **Prerequisites:**  Node.js
@@ -15,9 +24,11 @@ View your app in AI Studio: https://ai.studio/apps/10273abf-7558-4676-b3ff-68b91
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Optional: set `GEMINI_API_KEY` in a root `.env` file to enable Gemini
+   augmentation. Reel generation also works without a key using local templates.
 3. Run the app:
    `npm run dev`
+4. Open `http://localhost:3000`.
 
 ## Quote attribution
 

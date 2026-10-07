@@ -1,16 +1,18 @@
 import React from 'react';
 import { GeneratedReel } from '../types';
-import { Film, Play, CheckCircle2, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Film, Play, CheckCircle2, Clock, ShieldCheck, ArrowRight, Trash2 } from 'lucide-react';
 
 interface MyReelsProps {
   reels: GeneratedReel[];
   onOpenReel: (reel: GeneratedReel) => void;
+  onDeleteReel: (reel: GeneratedReel) => void;
   onCreateNew: () => void;
 }
 
 export const MyReels: React.FC<MyReelsProps> = ({
   reels,
   onOpenReel,
+  onDeleteReel,
   onCreateNew
 }) => {
   return (
@@ -86,10 +88,24 @@ export const MyReels: React.FC<MyReelsProps> = ({
                       <span className="rounded bg-black/60 px-2 py-0.5 text-[10px] font-bold text-amber-200 backdrop-blur-xs">
                         {reel.theme}
                       </span>
-                      <span className={`flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold text-white ${reel.sourcePassport.sourceStatus === 'Verified ✓' ? 'bg-[#27190f]' : 'bg-amber-800'}`}>
-                        {reel.sourcePassport.sourceStatus === 'Verified ✓' && <ShieldCheck className="h-3 w-3 text-[#c38c3e]" />}
-                        {reel.sourcePassport.sourceStatus}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold text-white ${reel.sourcePassport.sourceStatus === 'Verified ✓' ? 'bg-[#27190f]' : 'bg-amber-800'}`}>
+                          {reel.sourcePassport.sourceStatus === 'Verified ✓' && <ShieldCheck className="h-3 w-3 text-[#c38c3e]" />}
+                          {reel.sourcePassport.sourceStatus}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label={`Delete reel: ${reel.title}`}
+                          title="Delete reel"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDeleteReel(reel);
+                          }}
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700 text-white shadow-lg transition-colors hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-700"
+                        >
+                          <Trash2 aria-hidden="true" className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="absolute bottom-3 left-3 right-3">
@@ -102,7 +118,7 @@ export const MyReels: React.FC<MyReelsProps> = ({
                     </div>
 
                     {/* Hover Play Button */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 bg-black/25">
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 bg-black/25">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f7eedf] text-[#27190f] shadow-lg">
                         <Play className="h-5 w-5 fill-current ml-0.5" />
                       </div>

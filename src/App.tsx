@@ -142,6 +142,11 @@ export default function App() {
     setReels(prev => prev.map(r => r.id === updated.id ? updated : r));
   };
 
+  const handleDeleteReel = (reel: GeneratedReel) => {
+    if (!window.confirm(`Delete "${reel.title}" from My Reels?`)) return;
+    setReels(prev => prev.filter(savedReel => savedReel.id !== reel.id));
+  };
+
   const handleChallengeCompleted = () => {
     setVivekaStreak(prev => prev + 1);
   };
@@ -240,6 +245,7 @@ export default function App() {
               setCurrentReel(reel);
               setCurrentTab('studio');
             }}
+            onDeleteReel={handleDeleteReel}
             onCreateNew={() => setCurrentTab('create')}
           />
         )}
